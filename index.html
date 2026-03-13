@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blackjack Hub</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="table-glow"></div>
+    <main class="app-shell">
+      <header class="hero">
+        <p class="eyebrow">Blackjack Hub</p>
+        <h1>Blackjack Hub</h1>
+        <p class="subtitle">Count Lab fuer Training und Multiplayer Blackjack fuer echtes Tischgefuehl.</p>
+      </header>
+
+      <section class="panel hub-switch">
+        <button class="hub-tab active" data-hub-target="countLabHub">Blackjack Count Lab</button>
+        <button class="hub-tab" data-hub-target="multiplayerHub">Multiplayer Blackjack</button>
+      </section>
+
+      <div id="countLabHub" class="hub-page">
+        <section class="panel controls">
+          <label class="control">
+            <span>Modus</span>
+            <select id="modeSelect">
+              <option value="trainer" selected>Trainer</option>
+              <option value="play">Play vs Dealer</option>
+            </select>
+          </label>
+
+          <label class="control">
+            <span>Decks</span>
+            <select id="deckCount">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="6" selected>6</option>
+              <option value="8">8</option>
+            </select>
+          </label>
+
+          <label class="switch trainer-only" id="quizWrap">
+            <input id="quizMode" type="checkbox" />
+            <span>Quiz Mode</span>
+          </label>
+
+          <button id="newShoeBtn" class="btn">Neues Shoe</button>
+          <button id="nextCardBtn" class="btn btn-accent trainer-only">Naechste Karte</button>
+        </section>
+
+        <section id="trainerSection" class="panel center-stage">
+          <div id="cardDisplay" class="card placeholder">
+            <span class="rank">?</span>
+            <span class="suit">&clubs;</span>
+          </div>
+
+          <div id="answerPad" class="answer-pad disabled">
+            <button class="answer" data-answer="1">+1</button>
+            <button class="answer" data-answer="0">0</button>
+            <button class="answer" data-answer="-1">-1</button>
+          </div>
+
+          <p id="feedback" class="feedback">Druecke "Naechste Karte", um zu starten.</p>
+        </section>
+
+        <section id="playSection" class="panel play-stage hidden">
+          <div class="hands-grid">
+            <article class="hand-block">
+              <h2>Dealer</h2>
+              <div id="dealerHand" class="hand-cards"></div>
+              <p id="dealerValue" class="hand-value">Wert: 0</p>
+            </article>
+            <article class="hand-block">
+              <h2>Du</h2>
+              <div id="playerHand" class="hand-cards"></div>
+              <p id="playerValue" class="hand-value">Wert: 0</p>
+            </article>
+          </div>
+
+          <div class="play-controls">
+            <button id="startRoundBtn" class="btn btn-accent">Neue Runde</button>
+            <button id="hitBtn" class="btn">Hit</button>
+            <button id="standBtn" class="btn">Stand</button>
+            <button id="doubleBtn" class="btn btn-double">Double</button>
+            <button id="splitBtn" class="btn">Split</button>
+          </div>
+
+          <div id="countCheck" class="count-check hidden">
+            <p id="countPrompt" class="count-prompt">Was ist der aktuelle Running Count?</p>
+            <div class="count-row">
+              <input id="countGuessInput" type="number" inputmode="numeric" />
+              <button id="submitCountBtn" class="btn">Count pruefen</button>
+            </div>
+            <p id="countCheckFeedback" class="feedback"></p>
+          </div>
+
+          <p id="playFeedback" class="feedback">Play Mode aktiv. Starte eine neue Runde.</p>
+        </section>
+
+        <section id="statsPanel" class="panel metrics">
+          <div class="metrics-head">
+            <h2 class="metrics-title">Aktuelle Stats</h2>
+            <button id="statsToggleBtn" class="btn btn-small" aria-expanded="true" aria-controls="statsBody">
+              Stats einklappen
+            </button>
+          </div>
+
+          <div id="statsBody" class="metrics-body">
+            <div class="metric-grid">
+              <article class="metric">
+                <p>Running Count</p>
+                <strong id="runningCount">0</strong>
+              </article>
+              <article class="metric">
+                <p>True Count</p>
+                <strong id="trueCount">0.0</strong>
+              </article>
+              <article class="metric">
+                <p>Karten gesehen</p>
+                <strong id="cardsSeen">0</strong>
+              </article>
+              <article class="metric">
+                <p>Karten im Shoe</p>
+                <strong id="cardsRemaining">0</strong>
+              </article>
+              <article class="metric">
+                <p>Count Genauigkeit</p>
+                <strong id="accuracy">0%</strong>
+              </article>
+              <article class="metric">
+                <p>Beste Serie</p>
+                <strong id="bestStreak">0</strong>
+              </article>
+            </div>
+
+            <div class="penetration-wrap">
+              <div class="penetration-head">
+                <span>Shoe Penetration</span>
+                <span id="penetrationText">0%</span>
+              </div>
+              <div class="penetration-track">
+                <div id="penetrationFill" class="penetration-fill"></div>
+              </div>
+            </div>
+
+            <div>
+              <h2>Letzte Karten</h2>
+              <div id="history" class="history"></div>
+            </div>
+
+            <div class="legend">
+              <h2>Hi-Lo Tags</h2>
+              <p><strong>+1:</strong> 2, 3, 4, 5, 6</p>
+              <p><strong>0:</strong> 7, 8, 9</p>
+              <p><strong>-1:</strong> 10, J, Q, K, A</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section id="multiplayerHub" class="panel multiplayer-hub hidden">
+        <div class="multi-head">
+          <h2>Multiplayer Blackjack</h2>
+          <p>Erstelle einen Raum, teile den Code und spielt mit Spielgeld gemeinsam am Tisch.</p>
+        </div>
+
+        <div class="multi-connect">
+          <label class="control">
+            <span>Name</span>
+            <input id="multiNameInput" type="text" maxlength="20" placeholder="Dein Name" />
+          </label>
+          <button id="createRoomBtn" class="btn btn-accent">Raum erstellen</button>
+          <label class="control">
+            <span>Raumcode</span>
+            <input id="joinCodeInput" type="text" maxlength="6" placeholder="AB12CD" />
+          </label>
+          <button id="joinRoomBtn" class="btn">Raum beitreten</button>
+        </div>
+
+        <div id="roomPanel" class="room-panel hidden">
+          <div class="room-top">
+            <p>Raum <strong id="roomCodeLabel">-</strong></p>
+            <p>Du <strong id="myNameLabel">-</strong></p>
+            <button id="leaveRoomBtn" class="btn">Raum verlassen</button>
+          </div>
+
+          <p id="roomStatus" class="feedback">Verbinde...</p>
+
+          <div class="table-stage">
+            <div class="blackjack-table">
+              <div class="table-brand">
+                <p>BLACKJACK</p>
+                <span id="tablePhaseLabel">Warte auf Bets</span>
+              </div>
+
+              <article class="table-seat dealer-seat">
+                <header class="seat-head">
+                  <strong>Dealer</strong>
+                  <span id="multiDealerValue" class="player-meta">Wert: -</span>
+                </header>
+                <div id="multiDealerCards" class="seat-cards"></div>
+              </article>
+
+              <div id="multiPlayerSeats" class="player-seats"></div>
+            </div>
+          </div>
+
+          <div class="multi-controls">
+            <div class="control-group player-actions">
+              <label class="control">
+                <span>Bet</span>
+                <input id="betInput" type="number" min="10" step="10" value="50" />
+              </label>
+              <button id="placeBetBtn" class="btn">Bet setzen</button>
+              <button id="clearBetBtn" class="btn">Bet loeschen</button>
+              <button id="hitMultiBtn" class="btn">Hit</button>
+              <button id="standMultiBtn" class="btn">Stand</button>
+              <button id="doubleMultiBtn" class="btn btn-double">Double</button>
+              <button id="splitMultiBtn" class="btn">Split</button>
+            </div>
+            <div id="hostActions" class="control-group host-actions hidden">
+              <button id="startRoundHostBtn" class="btn btn-accent">Runde starten (Host)</button>
+              <button id="rebuyBtn" class="btn">+1000 Chips fuer alle</button>
+            </div>
+          </div>
+        </div>
+
+        <p id="multiError" class="feedback"></p>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+    <script src="multiplayer.js"></script>
+  </body>
+</html>

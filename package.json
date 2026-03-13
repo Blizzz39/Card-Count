@@ -1,0 +1,15 @@
+{
+  "name": "Blackjack1",
+  "version": "1.0.0",
+  "description": "Blackjack card counting trainer",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"No tests configured\""
+  },
+  "private": true,
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}
