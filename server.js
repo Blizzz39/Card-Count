@@ -243,6 +243,10 @@ function getHandStatusLabel(hand) {
 }
 
 function getPlayerStatusLabel(player) {
+  if (player.isSittingOut) {
+    return "Pausiert";
+  }
+
   if (player.lastOutcome) {
     return player.lastOutcome;
   }
@@ -267,7 +271,9 @@ function getPlayerStatusLabel(player) {
 }
 
 function getEligiblePlayers(room) {
-  return [...room.players.values()].filter((player) => player.bet >= MIN_BET && player.balance >= player.bet);
+  return [...room.players.values()].filter(
+    (player) => !player.isSittingOut && player.bet >= MIN_BET && player.balance >= player.bet,
+  );
 }
 
 function getRoundPlayers(room) {
@@ -350,6 +356,28 @@ function canPlayerDouble(room, player) {
   return true;
 }
 
+function setPlayerSittingOut(room, player, shouldSitOut) {
+  player.isSittingOut = shouldSitOut;
+
+  if (!shouldSitOut) {
+    return;
+  }
+
+  player.bet = 0;
+
+  if (room.phase === "playing" && player.hands.length > 0) {
+    for (const hand of player.hands) {
+      if (hand.state === "playing") {
+        hand.state = "stood";
+      }
+    }
+    refreshPlayerState(player);
+    return;
+  }
+
+  player.state = "waiting";
+}
+
 function scheduleAutoStart(room) {
   clearAutoStartTimer(room);
 
@@ -423,6 +451,7 @@ function serializeRoomForViewer(room, viewerId) {
         })),
         statusLabel: getPlayerStatusLabel(player),
         isHost: player.id === room.hostId,
+        isSittingOut: player.isSittingOut,
       };
     }),
     viewer: {
@@ -430,8 +459,9 @@ function serializeRoomForViewer(room, viewerId) {
       name: viewer ? viewer.name : null,
       isHost: Boolean(viewer) && viewer.id === room.hostId,
       inRoom: Boolean(viewer),
+      isSittingOut: Boolean(viewer) && viewer.isSittingOut,
       bet: viewer ? viewer.bet : 0,
-      canBet: Boolean(viewer) && ["lobby", "betting"].includes(room.phase),
+      canBet: Boolean(viewer) && !viewer.isSittingOut && ["lobby", "betting"].includes(room.phase),
       canStartRound: Boolean(viewer) && viewer.id === room.hostId && canStartRound(room),
       canRebuyAll: Boolean(viewer) && viewer.id === room.hostId,
       canAdjustPlayers: Boolean(viewer) && viewer.id === room.hostId,
@@ -472,7 +502,7 @@ function startRound(room, { auto = false } = {}) {
   const participants = getEligiblePlayers(room);
   if (participants.length === 0) {
     room.phase = "betting";
-    return { ok: false, message: "Keine gueltigen Bets fuer eine Runde." };
+    return { ok: false, message: "Keine gültigen Bets für eine Runde." };
   }
 
   // Deduct bets and create initial hands
@@ -579,7 +609,7 @@ function evaluateRoundProgress(room) {
   if (roundPlayers.length === 0) {
     room.phase = "betting";
     room.dealerHand = [];
-    room.message = "Keine aktiven Haende. Neue Bets setzen.";
+    room.message = "Keine aktiven Hände. Neue Bets setzen.";
     scheduleAutoStart(room);
     return;
   }
@@ -626,7 +656,7 @@ function applyPlayerAction(room, player, action) {
     player.activeHandIndex = index;
     refreshPlayerState(player);
 
-    room.message = `${player.name} splittet in zwei Haende.`;
+    room.message = `${player.name} splittet in zwei Hände.`;
     evaluateRoundProgress(room);
     return { ok: true };
   }
@@ -715,6 +745,7 @@ function resetPlayerStateForLobby(player, name) {
   player.activeHandIndex = 0;
   player.state = "waiting";
   player.lastOutcome = "";
+  player.isSittingOut = false;
 }
 
 function removePlayerFromRoom(player, reason) {
@@ -788,6 +819,7 @@ wss.on("connection", (ws) => {
     activeHandIndex: 0,
     state: "waiting",
     lastOutcome: "",
+    isSittingOut: false,
   };
 
   clients.set(ws, client);
@@ -798,7 +830,7 @@ wss.on("connection", (ws) => {
     try {
       payload = JSON.parse(raw.toString());
     } catch {
-      send(ws, { type: "error", message: "Ungueltige Nachricht." });
+      send(ws, { type: "error", message: "Ungültige Nachricht." });
       return;
     }
 
@@ -877,6 +909,10 @@ wss.on("connection", (ws) => {
         send(ws, { type: "error", message: "Bets sind nur vor der Runde erlaubt." });
         return;
       }
+      if (currentClient.isSittingOut) {
+        send(ws, { type: "error", message: "Du bist aufgestanden. Setz dich wieder hin, um mitzuspielen." });
+        return;
+      }
 
       const amount = Math.floor(Number(payload.amount));
       if (!Number.isFinite(amount) || amount < MIN_BET) {
@@ -884,7 +920,7 @@ wss.on("connection", (ws) => {
         return;
       }
       if (amount > currentClient.balance) {
-        send(ws, { type: "error", message: "Nicht genug Chips fuer diese Bet." });
+        send(ws, { type: "error", message: "Nicht genug Chips für diese Bet." });
         return;
       }
 
@@ -898,13 +934,30 @@ wss.on("connection", (ws) => {
 
     if (payload.type === "clear_bet") {
       if (!["lobby", "betting"].includes(room.phase)) {
-        send(ws, { type: "error", message: "Bet kann gerade nicht geloescht werden." });
+        send(ws, { type: "error", message: "Bet kann gerade nicht gelöscht werden." });
         return;
       }
 
       currentClient.bet = 0;
-      room.message = `${currentClient.name} loescht die Bet.`;
+      room.message = `${currentClient.name} löscht die Bet.`;
       scheduleAutoStart(room);
+      broadcastRoom(room);
+      return;
+    }
+
+    if (payload.type === "toggle_sit_out") {
+      const nextSitOut = !currentClient.isSittingOut;
+      setPlayerSittingOut(room, currentClient, nextSitOut);
+
+      room.message = nextSitOut
+        ? `${currentClient.name} ist aufgestanden und pausiert.`
+        : `${currentClient.name} sitzt wieder am Tisch.`;
+
+      if (room.phase === "playing") {
+        evaluateRoundProgress(room);
+      } else {
+        scheduleAutoStart(room);
+      }
       broadcastRoom(room);
       return;
     }
@@ -926,24 +979,24 @@ wss.on("connection", (ws) => {
 
     if (payload.type === "host_adjust_player") {
       if (room.hostId !== currentClient.id) {
-        send(ws, { type: "error", message: "Nur der Host darf Spieler-Chips aendern." });
+        send(ws, { type: "error", message: "Nur der Host darf Spieler-Chips ändern." });
         return;
       }
 
       const targetId = String(payload.targetId || "");
       const targetPlayer = room.players.get(targetId);
       if (!targetPlayer) {
-        send(ws, { type: "error", message: "Ausgewaehlter Spieler nicht gefunden." });
+        send(ws, { type: "error", message: "Ausgewählter Spieler nicht gefunden." });
         return;
       }
 
       const delta = Math.floor(Number(payload.delta));
       if (!Number.isFinite(delta) || delta === 0) {
-        send(ws, { type: "error", message: "Chip-Aenderung muss ungleich 0 sein." });
+        send(ws, { type: "error", message: "Chip-Änderung muss ungleich 0 sein." });
         return;
       }
       if (Math.abs(delta) > 1000000) {
-        send(ws, { type: "error", message: "Chip-Aenderung ist zu gross." });
+        send(ws, { type: "error", message: "Chip-Änderung ist zu gross." });
         return;
       }
 

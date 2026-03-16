@@ -315,13 +315,13 @@ function resolveRecommendedAction(ideal, options) {
   if (action === "split" && !options.canSplit) {
     const fallbackAction = ideal.noSplit ?? "hit";
     action = fallbackAction;
-    reason = `${ideal.reason} Split ist hier nicht moeglich, daher ${actionLabel(fallbackAction)} als beste Alternative.`;
+    reason = `${ideal.reason} Split ist hier nicht möglich, daher ${actionLabel(fallbackAction)} als beste Alternative.`;
   }
 
   if (action === "double" && !options.canDouble) {
     const fallbackAction = ideal.noDouble ?? "hit";
     action = fallbackAction;
-    reason = `${ideal.reason} Double ist hier nicht moeglich, daher ${actionLabel(fallbackAction)} als beste Alternative.`;
+    reason = `${ideal.reason} Double ist hier nicht möglich, daher ${actionLabel(fallbackAction)} als beste Alternative.`;
   }
 
   return { action, reason };
@@ -355,7 +355,7 @@ function recommendPairAction(pairRank, dealerValue) {
       return {
         action: "split",
         noSplit: "stand",
-        reason: "9er gegen mittlere Dealerkarten werden gesplittet, um zwei gewinnbare Haende zu erzeugen.",
+        reason: "9er gegen mittlere Dealerkarten werden gesplittet, um zwei gewinnbare Hände zu erzeugen.",
       };
     }
     return {
@@ -377,12 +377,12 @@ function recommendPairAction(pairRank, dealerValue) {
       return {
         action: "split",
         noSplit: "hit",
-        reason: "7er gegen 2 bis 7 splitten, um Druck auf die schwaechere Dealer-Range zu machen.",
+        reason: "7er gegen 2 bis 7 splitten, um Druck auf die schwächere Dealer-Range zu machen.",
       };
     }
     return {
       action: "hit",
-      reason: "14 gegen starke Dealerkarten ist zu schwach fuer Stand.",
+      reason: "14 gegen starke Dealerkarten ist zu schwach für Stand.",
     };
   }
 
@@ -396,7 +396,7 @@ function recommendPairAction(pairRank, dealerValue) {
     }
     return {
       action: "hit",
-      reason: "12 gegen 7 oder hoeher ist zu passiv fuer Stand.",
+      reason: "12 gegen 7 oder höher ist zu passiv für Stand.",
     };
   }
 
@@ -424,7 +424,7 @@ function recommendPairAction(pairRank, dealerValue) {
     }
     return {
       action: "hit",
-      reason: "8 ist gegen die meisten Dealer-Upcards zu niedrig fuer Stand.",
+      reason: "8 ist gegen die meisten Dealer-Upcards zu niedrig für Stand.",
     };
   }
 
@@ -433,12 +433,12 @@ function recommendPairAction(pairRank, dealerValue) {
       return {
         action: "split",
         noSplit: "hit",
-        reason: "Kleine Paare gegen 2 bis 7 splitten fuer zwei bessere Aufbau-Chancen.",
+        reason: "Kleine Paare gegen 2 bis 7 splitten für zwei bessere Aufbau-Chancen.",
       };
     }
     return {
       action: "hit",
-      reason: "Kleine Paare gegen 8 oder hoeher nicht stehen lassen.",
+      reason: "Kleine Paare gegen 8 oder höher nicht stehen lassen.",
     };
   }
 
@@ -452,7 +452,7 @@ function recommendSoftAction(total, dealerValue) {
   if (total >= 20) {
     return {
       action: "stand",
-      reason: "Soft 20 ist stark genug, da willst du keine Volatilitaet mehr.",
+      reason: "Soft 20 ist stark genug, da willst du keine Volatilität mehr.",
     };
   }
 
@@ -461,7 +461,7 @@ function recommendSoftAction(total, dealerValue) {
       return {
         action: "double",
         noDouble: "stand",
-        reason: "Soft 19 gegen 6 nutzt die hohe Bust-Wahrscheinlichkeit des Dealers fuer maximalen Wert.",
+        reason: "Soft 19 gegen 6 nutzt die hohe Bust-Wahrscheinlichkeit des Dealers für maximalen Wert.",
       };
     }
     return {
@@ -500,7 +500,7 @@ function recommendSoftAction(total, dealerValue) {
     }
     return {
       action: "hit",
-      reason: "Soft 17 ist zu schwach fuer Stand.",
+      reason: "Soft 17 ist zu schwach für Stand.",
     };
   }
 
@@ -528,7 +528,7 @@ function recommendSoftAction(total, dealerValue) {
 
   return {
     action: "hit",
-    reason: "Niedrige Soft-Haende werden weiterentwickelt statt stehen gelassen.",
+    reason: "Niedrige Soft-Hände werden weiterentwickelt statt stehen gelassen.",
   };
 }
 
@@ -536,7 +536,7 @@ function recommendHardAction(total, dealerValue) {
   if (total >= 17) {
     return {
       action: "stand",
-      reason: "Hard 17+ steht, weil zusaetzliche Karte oft nur bustet.",
+      reason: "Hard 17+ steht, weil zusätzliche Karte oft nur bustet.",
     };
   }
 
@@ -570,7 +570,7 @@ function recommendHardAction(total, dealerValue) {
     return {
       action: "double",
       noDouble: "hit",
-      reason: "Hard 11 ist der staerkste Double-Spot gegen jede Dealer-Upcard.",
+      reason: "Hard 11 ist der stärkste Double-Spot gegen jede Dealer-Upcard.",
     };
   }
 
@@ -579,7 +579,7 @@ function recommendHardAction(total, dealerValue) {
       return {
         action: "double",
         noDouble: "hit",
-        reason: "Hard 10 gegen 2 bis 9 wird fuer maximalen Erwartungswert verdoppelt.",
+        reason: "Hard 10 gegen 2 bis 9 wird für maximalen Erwartungswert verdoppelt.",
       };
     }
     return {
@@ -663,7 +663,7 @@ function getDecisionReviewText(action) {
 
   return {
     tone: "warn",
-    text: `Nicht optimal: ${actionLabel(action)}. ${recommendation.context}: Besser waere ${actionLabel(
+    text: `Nicht optimal: ${actionLabel(action)}. ${recommendation.context}: Besser wäre ${actionLabel(
       recommendation.action,
     )}. ${recommendation.reason}`,
   };
@@ -693,6 +693,14 @@ function currentActionPrompt() {
 function renderHand(container, hand) {
   container.innerHTML = "";
   for (const card of hand) {
+    if (card.hidden) {
+      const back = document.createElement("span");
+      back.className = "card-back";
+      back.textContent = "ZU";
+      container.append(back);
+      continue;
+    }
+
     const item = document.createElement("span");
     item.className = `mini-card${card.isRed ? " red" : ""}`;
     item.textContent = formatCard(card);
@@ -702,7 +710,13 @@ function renderHand(container, hand) {
 
 function renderPlayHands() {
   renderHand(dealerHandEl, state.play.dealerHand);
-  dealerValueEl.textContent = `Wert: ${handValue(state.play.dealerHand)}`;
+  if (state.play.dealerHand.some((card) => card.hidden)) {
+    dealerValueEl.textContent = "Wert: ?";
+  } else if (state.play.dealerHand.length === 0) {
+    dealerValueEl.textContent = "Wert: 0";
+  } else {
+    dealerValueEl.textContent = `Wert: ${handValue(state.play.dealerHand)}`;
+  }
 
   playerHandEl.innerHTML = "";
   const hands = state.play.playerHands;
@@ -874,7 +888,7 @@ function newShoe() {
   resetPlayState();
   renderHistory();
 
-  setTrainerFeedback('Frisches Shoe gemischt. Druecke "Naechste Karte".');
+  setTrainerFeedback('Frisches Shoe gemischt. Drücke "Nächste Karte".');
   setPlayFeedback('Play Mode aktiv. Klicke "Neue Runde".');
   updateMetrics();
 }
@@ -920,7 +934,7 @@ function drawTrainerCard() {
   }
 
   applyCardToState(card);
-  setTrainerFeedback(`${formatCard(card)} gezaehlt als ${formatSigned(card.value)}.`);
+  setTrainerFeedback(`${formatCard(card)} gezählt als ${formatSigned(card.value)}.`);
 }
 
 function answerTrainerCard(guess) {
@@ -956,7 +970,7 @@ function setMode(nextMode) {
   if (state.mode === "trainer" && state.trainer.pendingCard) {
     applyCardToState(state.trainer.pendingCard);
     setTrainerFeedback(
-      `Moduswechsel: ${formatCard(state.trainer.pendingCard)} automatisch gezaehlt (${formatSigned(
+      `Moduswechsel: ${formatCard(state.trainer.pendingCard)} automatisch gezählt (${formatSigned(
         state.trainer.pendingCard.value,
       )}).`,
       "warn",
@@ -1000,11 +1014,16 @@ function promptCountCheck(prompt, onContinue) {
   countGuessInputEl.focus();
 }
 
-function drawForPlay(target, playerHandOverride = null) {
+function drawForPlay(target, playerHandOverride = null, options = {}) {
   const card = takeCardFromShoe();
   if (!card) {
     return null;
   }
+
+  const hidden = Boolean(options.hidden);
+  const deferCount = Boolean(options.deferCount);
+  card.hidden = hidden;
+  card.counted = !deferCount;
 
   if (target === "player") {
     const targetHand = playerHandOverride ?? getActivePlayHand();
@@ -1016,9 +1035,38 @@ function drawForPlay(target, playerHandOverride = null) {
     state.play.dealerHand.push(card);
   }
 
-  applyCardToState(card);
+  if (deferCount) {
+    updateMetrics();
+  } else {
+    applyCardToState(card);
+  }
   renderPlayHands();
   return card;
+}
+
+function revealDealerHoleCard(onContinue) {
+  const holeCard = state.play.dealerHand.find((card) => card.hidden);
+  if (!holeCard) {
+    if (typeof onContinue === "function") {
+      onContinue();
+    }
+    return;
+  }
+
+  holeCard.hidden = false;
+  if (!holeCard.counted) {
+    holeCard.counted = true;
+    applyCardToState(holeCard);
+  } else {
+    updateMetrics();
+  }
+  renderPlayHands();
+
+  promptCountCheck(`Dealer deckt ${formatCard(holeCard)} auf`, () => {
+    if (typeof onContinue === "function") {
+      onContinue();
+    }
+  });
 }
 
 function finishPlayRound(message, tone = "neutral") {
@@ -1026,7 +1074,7 @@ function finishPlayRound(message, tone = "neutral") {
   state.play.phase = "finished";
   state.play.pendingCheck = null;
   setCountCheckVisible(false);
-  setPlayFeedback(`${message} Starte "Neue Runde" fuer die naechste Hand.`, tone);
+  setPlayFeedback(`${message} Starte "Neue Runde" für die nächste Hand.`, tone);
   updateMetrics();
 }
 
@@ -1175,7 +1223,12 @@ function startPlayRound() {
   setPlayFeedback("Runde startet...");
   updateMetrics();
 
-  const openingOrder = ["player", "dealer", "player", "dealer"];
+  const openingOrder = [
+    { target: "player", faceDown: false },
+    { target: "dealer", faceDown: false },
+    { target: "player", faceDown: false },
+    { target: "dealer", faceDown: true },
+  ];
 
   function dealOpeningCard(index) {
     if (index >= openingOrder.length) {
@@ -1185,8 +1238,10 @@ function startPlayRound() {
       const dealerHasBlackjack = dealerValue === 21 && state.play.dealerHand.length === 2;
 
       if (playerHasBlackjack || dealerHasBlackjack) {
-        const naturalResult = getPlayResultMessage();
-        finishPlayRound(naturalResult.text, naturalResult.tone);
+        revealDealerHoleCard(() => {
+          const naturalResult = getPlayResultMessage();
+          finishPlayRound(naturalResult.text, naturalResult.tone);
+        });
         return;
       }
       state.play.phase = "player";
@@ -1195,16 +1250,30 @@ function startPlayRound() {
       return;
     }
 
-    const target = openingOrder[index];
+    const step = openingOrder[index];
+    const target = step.target;
     const card =
-      target === "player" ? drawForPlay("player", state.play.playerHands[0]) : drawForPlay("dealer");
+      target === "player"
+        ? drawForPlay("player", state.play.playerHands[0])
+        : drawForPlay("dealer", null, { hidden: step.faceDown, deferCount: step.faceDown });
     if (!card) {
       finishPlayRound('Shoe ist leer. Bitte "Neues Shoe" klicken.', "warn");
       return;
     }
 
-    const actor = target === "player" ? "Du" : "Dealer";
-    promptCountCheck(`${actor} zieht ${formatCard(card)}`, () => {
+    if (step.faceDown) {
+      dealOpeningCard(index + 1);
+      return;
+    }
+
+    if (target === "player") {
+      promptCountCheck(`Du ziehst ${formatCard(card)}`, () => {
+        dealOpeningCard(index + 1);
+      });
+      return;
+    }
+
+    promptCountCheck(`Dealer zeigt ${formatCard(card)}`, () => {
       dealOpeningCard(index + 1);
     });
   }
@@ -1248,7 +1317,7 @@ function playerDouble() {
     return;
   }
 
-  promptCountCheck(`Du ziehst ${formatCard(card)} fuer Double`, () => {
+  promptCountCheck(`Du ziehst ${formatCard(card)} für Double`, () => {
     if (handValue(activeHand.cards) > 21) {
       activeHand.status = "bust";
     } else {
@@ -1312,6 +1381,13 @@ function dealerTurn() {
     return;
   }
 
+  if (state.play.dealerHand.some((card) => card.hidden)) {
+    revealDealerHoleCard(() => {
+      dealerTurn();
+    });
+    return;
+  }
+
   const dealerValue = handValue(state.play.dealerHand);
   if (dealerValue >= 17) {
     const result = getPlayResultMessage();
@@ -1360,7 +1436,7 @@ quizModeEl.addEventListener("change", () => {
   if (state.trainer.pendingCard) {
     applyCardToState(state.trainer.pendingCard);
     setTrainerFeedback(
-      `Quiz umgestellt: ${formatCard(state.trainer.pendingCard)} automatisch gezaehlt (${formatSigned(
+      `Quiz umgestellt: ${formatCard(state.trainer.pendingCard)} automatisch gezählt (${formatSigned(
         state.trainer.pendingCard.value,
       )}).`,
       "warn",

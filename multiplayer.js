@@ -9,6 +9,7 @@
   const joinCodeInput = document.getElementById("joinCodeInput");
   const createRoomBtn = document.getElementById("createRoomBtn");
   const joinRoomBtn = document.getElementById("joinRoomBtn");
+  const sitOutBtn = document.getElementById("sitOutBtn");
   const leaveRoomBtn = document.getElementById("leaveRoomBtn");
   const roomPanel = document.getElementById("roomPanel");
   const roomCodeLabel = document.getElementById("roomCodeLabel");
@@ -223,6 +224,8 @@
     renderDealer(room.dealerHand);
     multiDealerValue.textContent = room.dealerValue !== null ? `Wert: ${room.dealerValue}` : "Wert: -";
     renderPlayers(room.players, room.viewer.id, room.viewer.canAdjustPlayers);
+    sitOutBtn.disabled = !room.viewer.inRoom;
+    sitOutBtn.textContent = room.viewer.isSittingOut ? "Wieder hinsetzen" : "Aufstehen";
 
     betInput.disabled = !room.viewer.canBet;
     placeBetBtn.disabled = !room.viewer.canBet;
@@ -247,6 +250,8 @@
     multiDealerValue.textContent = "Wert: -";
     tablePhaseLabel.textContent = "Warte auf Bets";
     setRoomStatus("Kein aktiver Raum.");
+    sitOutBtn.disabled = true;
+    sitOutBtn.textContent = "Aufstehen";
     placeBetBtn.disabled = true;
     clearBetBtn.disabled = true;
     rebuyBtn.disabled = true;
@@ -309,7 +314,7 @@
     });
 
     socket.addEventListener("close", () => {
-      setMultiMessage("Verbindung getrennt. Reconnect laeuft...", "warn");
+      setMultiMessage("Verbindung getrennt. Reconnect läuft...", "warn");
       reconnectTimer = setTimeout(connectSocket, 1400);
     });
   }
@@ -351,6 +356,13 @@
 
   leaveRoomBtn.addEventListener("click", () => {
     sendMessage({ type: "leave_room" });
+  });
+
+  sitOutBtn.addEventListener("click", () => {
+    if (!roomState || !roomState.viewer.inRoom) {
+      return;
+    }
+    sendMessage({ type: "toggle_sit_out" });
   });
 
   placeBetBtn.addEventListener("click", () => {
@@ -414,7 +426,7 @@
       const input = popupRoot ? popupRoot.querySelector(".seat-popup-input") : null;
       const amount = Number(input ? input.value : hostAdjustAmount);
       if (!Number.isFinite(amount) || amount <= 0) {
-        setMultiMessage("Bitte einen gueltigen Betrag eingeben.", "warn");
+        setMultiMessage("Bitte einen gültigen Betrag eingeben.", "warn");
         return;
       }
 
