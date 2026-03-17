@@ -289,7 +289,7 @@ function canPlayerSplitAction() {
   if (!hand || hand.cards.length !== 2) {
     return false;
   }
-  return normalizePairRank(hand.cards[0].rank) === normalizePairRank(hand.cards[1].rank);
+  return hand.cards[0].rank === hand.cards[1].rank;
 }
 
 function actionLabel(action) {

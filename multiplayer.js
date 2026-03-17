@@ -4,6 +4,7 @@
     countLabHub: document.getElementById("countLabHub"),
     multiplayerHub: document.getElementById("multiplayerHub"),
   };
+  const multiplayerHubEl = hubPages.multiplayerHub;
 
   const multiNameInput = document.getElementById("multiNameInput");
   const joinCodeInput = document.getElementById("joinCodeInput");
@@ -47,6 +48,13 @@
   let hostAdjustAmount = 100;
   let reconnectTimer = null;
 
+  function syncRoomActiveLayout() {
+    const roomActive = !roomPanel.classList.contains("hidden");
+    const multiplayerVisible = !multiplayerHubEl.classList.contains("hidden");
+    multiplayerHubEl.classList.toggle("room-active", roomActive);
+    document.body.classList.toggle("multiplayer-room-active", roomActive && multiplayerVisible);
+  }
+
   function setActiveHub(targetId) {
     for (const tab of hubTabs) {
       tab.classList.toggle("active", tab.dataset.hubTarget === targetId);
@@ -54,6 +62,7 @@
     for (const [key, page] of Object.entries(hubPages)) {
       page.classList.toggle("hidden", key !== targetId);
     }
+    syncRoomActiveLayout();
   }
 
   function setMultiMessage(text, tone = "neutral") {
@@ -209,6 +218,7 @@
   function renderRoom(room) {
     roomState = room;
     roomPanel.classList.remove("hidden");
+    syncRoomActiveLayout();
 
     roomCodeLabel.textContent = room.code;
     myNameLabel.textContent = room.viewer.name || "-";
@@ -243,6 +253,7 @@
     roomState = null;
     selectedPlayerId = null;
     roomPanel.classList.add("hidden");
+    syncRoomActiveLayout();
     roomCodeLabel.textContent = "-";
     myNameLabel.textContent = "-";
     multiPlayerSeats.innerHTML = "";

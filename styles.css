@@ -22,8 +22,8 @@ body {
   font-family: "Trebuchet MS", "Verdana", sans-serif;
   color: var(--text);
   background: radial-gradient(circle at 20% 10%, #267a4f 0%, transparent 40%),
-    radial-gradient(circle at 80% 90%, #195e3f 0%, transparent 42%),
-    linear-gradient(170deg, var(--felt-a), var(--felt-b));
+  radial-gradient(circle at 80% 90%, #195e3f 0%, transparent 42%),
+  linear-gradient(170deg, var(--felt-a), var(--felt-b));
   position: relative;
 }
 
@@ -32,11 +32,11 @@ body {
   inset: 0;
   pointer-events: none;
   background: repeating-radial-gradient(
-    circle at center,
-    rgba(255, 255, 255, 0.03) 0,
-    rgba(255, 255, 255, 0.03) 1px,
-    transparent 1px,
-    transparent 6px
+          circle at center,
+          rgba(255, 255, 255, 0.03) 0,
+          rgba(255, 255, 255, 0.03) 1px,
+          transparent 1px,
+          transparent 6px
   );
   opacity: 0.22;
 }
@@ -878,6 +878,96 @@ h2 {
 }
 
 @media (max-width: 560px) {
+  .app-shell {
+    padding: 0.7rem 0.55rem 1.25rem;
+    gap: 0.75rem;
+  }
+
+  .hero {
+    padding: 0.6rem 0.3rem 0.1rem;
+  }
+
+  .subtitle {
+    font-size: 0.88rem;
+  }
+
+  .hub-switch {
+    display: grid;
+    grid-template-columns: 1fr;
+    padding: 0.45rem;
+    gap: 0.4rem;
+  }
+
+  .hub-tab {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .controls,
+  .multi-connect {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .control {
+    width: 100%;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .switch {
+    width: 100%;
+  }
+
+  select,
+  input[type="text"],
+  input[type="number"] {
+    width: 100%;
+    min-height: 2.2rem;
+    font-size: 1rem;
+  }
+
+  .controls .btn,
+  .multi-connect .btn {
+    width: 100%;
+  }
+
+  .play-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .play-controls .btn {
+    width: 100%;
+  }
+
+  .play-controls #startRoundBtn {
+    grid-column: 1 / -1;
+  }
+
+  .count-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .count-row input {
+    width: 100%;
+  }
+
+  .metrics-head {
+    flex-wrap: wrap;
+  }
+
+  .metrics-head .btn {
+    width: 100%;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .controls {
     justify-content: center;
   }
@@ -892,7 +982,7 @@ h2 {
   }
 }
 
-@media (max-width: 920px) {
+@media (min-width: 561px) and (max-width: 920px) {
   .blackjack-table {
     min-height: 780px;
     border-radius: 26px;
@@ -950,6 +1040,269 @@ h2 {
     left: 50%;
     top: 28.6rem;
     transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 560px) {
+
+  /* --- Non-room mobile tweaks (always apply) --- */
+
+  .multiplayer-hub,
+  .play-stage,
+  .metrics,
+  .center-stage {
+    padding: 0.75rem;
+  }
+
+  .room-top {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+    align-items: stretch;
+  }
+
+  .room-top .btn {
+    width: 100%;
+  }
+
+  .table-stage {
+    padding: 0.45rem;
+  }
+
+  .blackjack-table::after {
+    display: none;
+  }
+
+  .table-brand {
+    position: static;
+    transform: none;
+    text-align: left;
+    padding: 0.4rem 0.45rem;
+    border-radius: 10px;
+    border: 1px solid rgba(242, 209, 104, 0.35);
+    background: rgba(0, 0, 0, 0.16);
+  }
+
+  .table-brand p {
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+  }
+
+  .table-brand span {
+    display: block;
+    margin-top: 0.12rem;
+  }
+
+  .table-seat,
+  .dealer-seat {
+    position: static !important;
+    width: 100%;
+    min-height: 0;
+    padding: 0.45rem;
+    transform: none !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+  }
+
+  .player-seats {
+    position: static !important;
+    inset: auto !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .player-seat {
+    position: static !important;
+    width: 100% !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .player-meta {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .table-card,
+  .card-back {
+    min-width: 1.85rem;
+    padding: 0.2rem 0.3rem;
+    font-size: 0.78rem;
+  }
+
+  .multi-controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 0.55rem;
+  }
+
+  .control-group {
+    width: 100%;
+  }
+
+  .player-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+    align-items: stretch;
+  }
+
+  .player-actions .control {
+    grid-column: 1 / -1;
+  }
+
+  .player-actions .btn,
+  .host-actions .btn {
+    width: 100%;
+  }
+
+  .host-actions {
+    border-top: 0;
+    padding-top: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+
+  /* --- Room-active: fixed full-screen layout --- */
+
+  body.multiplayer-room-active {
+    overflow: hidden;
+    height: 100dvh;
+  }
+
+  body.multiplayer-room-active .hero,
+  body.multiplayer-room-active .hub-switch,
+  body.multiplayer-room-active #multiError {
+    display: none;
+  }
+
+  /* App shell becomes a full-height flex column */
+  body.multiplayer-room-active .app-shell {
+    height: 100dvh;
+    max-height: 100dvh;
+    padding: 0.45rem 0.55rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  /* Hub fills remaining space */
+  body.multiplayer-room-active .multiplayer-hub.room-active {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    box-shadow: none;
+    overflow: hidden;
+  }
+
+  .multiplayer-hub.room-active .multi-head,
+  .multiplayer-hub.room-active .multi-connect {
+    display: none;
+  }
+
+  /* Room panel: flex column, fills hub */
+  .multiplayer-hub.room-active .room-panel {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    overflow: hidden;
+  }
+
+  /* Top bar: room info + status, never shrinks */
+  .multiplayer-hub.room-active .room-top {
+    flex-shrink: 0;
+  }
+
+  .multiplayer-hub.room-active #roomStatus {
+    flex-shrink: 0;
+    margin: 0;
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  /* Table stage: grows to fill space between status and controls */
+  .multiplayer-hub.room-active .table-stage {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+
+  /* Blackjack table: flex column, fills table-stage */
+  .multiplayer-hub.room-active .blackjack-table {
+    height: 100%;
+    min-height: 0;
+    width: 100%;
+    border-radius: 16px;
+    padding: 0.45rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    overflow: hidden;
+  }
+
+  /* Table brand: never shrinks */
+  .multiplayer-hub.room-active .table-brand {
+    flex-shrink: 0;
+  }
+
+  /* Dealer seat: never shrinks */
+  .multiplayer-hub.room-active .dealer-seat {
+    flex-shrink: 0;
+    background: rgba(3, 20, 14, 0.88);
+    border-color: rgba(242, 209, 104, 0.3);
+  }
+
+  /* Player seats container: scrollable, fills remaining space in the table */
+  .multiplayer-hub.room-active .player-seats {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-bottom: 0.2rem;
+  }
+
+  /* Own seat: sticky at the top of the scrollable list */
+  .multiplayer-hub.room-active .player-seat.self {
+    position: sticky !important;
+    top: 0;
+    z-index: 4;
+    background: rgba(5, 24, 17, 0.97);
+    border-color: rgba(242, 209, 104, 0.78);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .multiplayer-hub.room-active .player-seat {
+    flex-shrink: 0;
+    padding: 0.38rem;
+  }
+
+  /* Controls: never shrinks, sits at the bottom */
+  .multiplayer-hub.room-active .multi-controls {
+    flex-shrink: 0;
+    border-color: rgba(242, 209, 104, 0.26);
   }
 }
 
