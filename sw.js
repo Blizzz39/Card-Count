@@ -1,10 +1,12 @@
-const CACHE_NAME = 'card-count-v1';
+const CACHE_NAME = 'card-count-v2';
 
 const STATIC_ASSETS = [
     '/',
     '/index.html',
     '/styles.css',
     '/index.js',
+    '/multiplayer.js',
+    '/socket.io/socket.io.js',
     '/apple-touch-icon.png',
     '/favicon.ico',
     '/favicon-32x32.png',
