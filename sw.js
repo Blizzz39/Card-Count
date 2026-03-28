@@ -1,88 +1,62 @@
-const CACHE_NAME = "card-count-v4";
+const CACHE_NAME = 'card-count-v3';
 
-const PRECACHE_URLS = [
-  "/",
-  "/app.js",
-  "/multiplayer.js",
-  "/site.webmanifest",
-  "/apple-touch-icon.png",
-  "/favicon.ico",
-  "/favicon-32x32.png",
-  "/favicon-16x16.png",
+const STATIC_ASSETS = [
+    '/',
+    '/index.html',
+    '/styles.css',
+    '/index.js',
+    '/multiplayer.js',
+    '/socket.io/socket.io.js',
+    '/apple-touch-icon.png',
+    '/favicon.ico',
+    '/favicon-32x32.png',
+    '/favicon-16x16.png',
+    '/site.webmanifest'
 ];
 
-async function cacheIfAvailable(cache, url) {
-  try {
-    const response = await fetch(url, { cache: "no-store" });
-    if (response.ok) {
-      await cache.put(url, response.clone());
-    }
-  } catch {
-    // Offline waehrend der Installation soll den SW nicht blockieren.
-  }
-}
-
-async function networkFirst(request) {
-  const cache = await caches.open(CACHE_NAME);
-
-  try {
-    const response = await fetch(request, { cache: "no-store" });
-    if (response.ok) {
-      await cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    if (request.mode === "navigate") {
-      const fallbackResponse = await caches.match("/");
-      if (fallbackResponse) {
-        return fallbackResponse;
-      }
-    }
-
-    throw new Error("Network and cache unavailable");
-  }
-}
-
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      await Promise.all(PRECACHE_URLS.map((url) => cacheIfAvailable(cache, url)));
-      await self.skipWaiting();
-    })(),
-  );
+// Installation: alle statischen Assets cachen
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    );
+    self.skipWaiting();
 });
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    (async () => {
-      const keys = await caches.keys();
-      await Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
-      await self.clients.claim();
-    })(),
-  );
+// Aktivierung: alten Cache loeschen
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((keys) =>
+            Promise.all(
+                keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+            )
+        )
+    );
+    self.clients.claim();
 });
 
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
+// Fetch: Cache-first fuer statische Assets, Network-first fuer API/Socket
+self.addEventListener('fetch', (event) => {
+    const url = new URL(event.request.url);
 
-  if (request.method !== "GET") {
-    return;
-  }
+    // Socket.io und API-Anfragen immer ans Netzwerk weiterleiten
+    if (url.pathname.startsWith('/socket.io') || url.pathname.startsWith('/api')) {
+        return; // kein cachen, einfach durchlassen
+    }
 
-  if (url.origin !== self.location.origin) {
-    return;
-  }
-
-  if (url.pathname.startsWith("/socket.io") || url.pathname.startsWith("/api")) {
-    return;
-  }
-
-  event.respondWith(networkFirst(request));
+    // Alles andere: erst Cache, dann Netzwerk
+    event.respondWith(
+        caches.match(event.request).then((cached) => {
+            return cached || fetch(event.request).then((response) => {
+                // Neue Dateien auch in Cache schreiben
+                if (response.ok) {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                }
+                return response;
+            });
+        }).catch(() => {
+            // Offline-Fallback: Hauptseite zurueckgeben
+            return caches.match('/index.html');
+        })
+    );
 });
