@@ -797,9 +797,21 @@ const server = http.createServer((req, res) => {
     }
 
     const ext = path.extname(filePath).toLowerCase();
-    res.writeHead(200, {
+    const baseName = path.basename(filePath).toLowerCase();
+    const headers = {
       "Content-Type": contentTypes[ext] || "application/octet-stream",
       "Cache-Control": "no-cache",
+    };
+
+    if (baseName === "sw.js") {
+      headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
+      headers["Service-Worker-Allowed"] = "/";
+    } else if ([".html", ".js", ".css", ".json"].includes(ext)) {
+      headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+    }
+
+    res.writeHead(200, {
+      ...headers,
     });
     res.end(data);
   });
